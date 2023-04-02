@@ -1,36 +1,16 @@
-import { useEffect, useState } from 'react'
+import { O, X } from 'consts/common'
+import { useState } from 'react'
 import styled from 'styled-components'
+import { Turn } from 'types/common'
+import { getWinner } from 'utils/getWinner'
 
-const X = '✕'
-const O = '〇'
-const winnerCombos = [
-  [0, 1, 2],
-  [3, 4, 5],
-  [6, 7, 8],
-  [0, 3, 6],
-  [1, 4, 7],
-  [2, 5, 8],
-  [0, 4, 8],
-  [2, 4, 6],
-]
-
-type Turn = '✕' | '〇'
 type AreaItem = Turn | ''
 
 export const TikTakToe: React.FC = () => {
   const [area, setArea] = useState<AreaItem[]>(new Array(9).fill(''))
   const [turn, setTurn] = useState<Turn>(X)
-  const [winner, setWinner] = useState<Turn | undefined>(undefined)
-
-  useEffect(() => {
-    const newWinner = getWinner(area)
-
-    setWinner(newWinner)
-
-    if (area.every(x => x !== '') && !newWinner) {
-      setArea(new Array(9).fill(''))
-    }
-  }, [area])
+  const winner = getWinner(area)
+  const isDraw = area.every(x => x) && !winner
 
   const handleMouseEvent = (
     e: React.MouseEvent<HTMLDivElement>,
@@ -44,33 +24,22 @@ export const TikTakToe: React.FC = () => {
     setTurn(currTurn => (currTurn === X ? O : X))
   }
 
-  const getWinner = (arr: AreaItem[]): Turn | undefined =>
-    winnerCombos
-      .map(combo => combo.map(elem => arr[elem]))
-      .map(combo =>
-        combo[0] !== '' && combo[0] === combo[1] && combo[1] === combo[2]
-          ? combo[0]
-          : undefined,
-      )
-      .find(x => typeof x === 'string')
-
   const handleReset = (): void => {
-    setWinner(undefined)
     setArea(new Array(9).fill(''))
   }
 
   return (
     <TikTakComponent>
-      {' '}
-      <GameName>Tik-Tak Toe</GameName>{' '}
+      <GameName>Tik-Tak Toe</GameName>
       <GameWinner>
-        {winner === undefined ? 'Play the game!' : null}
-        {winner ? (
+        {winner && `winner: ${winner}`}
+        {isDraw && 'DRAW!'}
+        {winner || isDraw ? (
           <button onClick={handleReset} type='submit'>
             RESTART?
           </button>
         ) : (
-          `turn: ${turn}`
+          `Turn: ${turn}`
         )}
       </GameWinner>
       <GameContainer>
@@ -100,9 +69,10 @@ const GameName = styled.div`
 `
 const GameWinner = styled.div`
   display: flex;
-  justify-content: space-around;
   align-items: center;
   margin-bottom: 14px;
+  justify-content: center;
+  flex-direction: column;
 `
 const GameContainer = styled.div`
   display: flex;
@@ -122,6 +92,9 @@ const GameArea = styled.div`
   display: grid;
 `
 const GameCell = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
   height: 100%;
   background-color: skyblue;
 `
