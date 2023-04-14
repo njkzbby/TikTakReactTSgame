@@ -1,8 +1,18 @@
 import { O, X } from 'consts/common'
 import { useMemo, useState } from 'react'
-import styled from 'styled-components'
 import { Turn } from 'types/common'
 import { getWinner } from 'utils/getWinner'
+
+import {
+  GameArea,
+  GameCell,
+  GameContainer,
+  GameHistory,
+  GameName,
+  GameWinner,
+  HistoryStepButton,
+  TikTakComponent,
+} from './TikTakToe.styles'
 
 type AreaItem = Turn | ''
 
@@ -13,6 +23,7 @@ export const TikTakToe: React.FC = () => {
 
   const winner = useMemo(() => getWinner(area), [area])
   const isDraw = useMemo(() => area.every(x => x) && !winner, [area, winner])
+  const getTurnsCount = (arr: AreaItem[]): number => arr.filter(Boolean).length
 
   const handleMouseEvent = (
     e: React.MouseEvent<HTMLDivElement>,
@@ -26,9 +37,9 @@ export const TikTakToe: React.FC = () => {
 
     setArea(updatedArea)
 
-    setTurn(updatedArea.filter(Boolean).length % 2 === 0 ? X : O)
+    setTurn(getTurnsCount(updatedArea) % 2 === 0 ? X : O)
 
-    setHistory([...history.slice(0, area.filter(Boolean).length), updatedArea])
+    setHistory([...history.slice(0, getTurnsCount(area)), updatedArea])
   }
 
   const handleReset = (): void => {
@@ -38,7 +49,7 @@ export const TikTakToe: React.FC = () => {
   }
   const historyStep = (arr: AreaItem[]): void => {
     setArea(arr)
-    setTurn(arr.filter(Boolean).length % 2 === 0 ? X : O)
+    setTurn(getTurnsCount(arr) % 2 === 0 ? X : O)
   }
 
   return (
@@ -70,10 +81,10 @@ export const TikTakToe: React.FC = () => {
           </HistoryStepButton>
           {history.map((x, idx) => (
             <HistoryStepButton
-              key={x.filter(Boolean).length}
+              key={getTurnsCount(x)}
               onClick={() => historyStep(x)}
             >
-              Go to move # {idx + 1}
+              Go to move #{idx + 1}
             </HistoryStepButton>
           ))}
         </GameHistory>
@@ -81,76 +92,3 @@ export const TikTakToe: React.FC = () => {
     </TikTakComponent>
   )
 }
-
-const HistoryStepButton = styled.div`
-  cursor: pointer;
-  text-align: center;
-  width: 200px;
-  padding: 5px;
-  background-color: white;
-  border: solid aqua;
-  border-radius: 10px;
-  transition: transform 500ms, background-color 1s;
-
-  :hover {
-    transform: scale(1.2);
-    background-color: #bbd0ff;
-  }
-`
-
-const TikTakComponent = styled.div`
-  position: absolute;
-  height: 100%;
-  width: 100%;
-  background-color: #d7bedb;
-`
-const GameName = styled.div`
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  color: #24242e;
-  font-size: 40px;
-  margin-bottom: 14px;
-`
-const GameWinner = styled.div`
-  display: flex;
-  align-items: center;
-  margin-bottom: 14px;
-  justify-content: center;
-  flex-direction: column;
-`
-const GameContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-`
-
-const GameArea = styled.div`
-  width: 500px;
-  align-items: center;
-  grid-template-columns: 160px 160px 160px;
-  grid-template-rows: 160px 160px 160px;
-  gap: 10px;
-  font-size: 40px;
-  text-align: center;
-
-  display: grid;
-`
-const GameHistory = styled.div`
-  width: 300px;
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  position: absolute;
-  right: 300px;
-  gap: 8px;
-`
-
-const GameCell = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  background-color: skyblue;
-`
